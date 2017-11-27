@@ -1,0 +1,10 @@
+Dois cowboys rivais exploram uma terra longínqua encontrando-se numa fuga contra um grupo de nativos irados. Os nativos são fortes e apenas um dos cowboys poderá escapar daquele deserto.
+
+Instruçôes:
+Sobreviver mais tempo que o outro jogador. Evitar que o seu jogador entre em contacto com a linha de nativos irados desviando-se dos catos e dos nativos que vão surgindo, pois estes fazem-no retroceder. Existe uma linha de frente que nenhum jogador pode ultrapassar e para onde caminham os jogadores quando estão atrás dessa linha.
+
+2 jogadores: 
+- jogador 1: seta de cima e seta de baixo
+- jogador 2: tecla 'w' e tecla 'a' 
+(movimento na vertical)
+

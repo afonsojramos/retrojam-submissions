@@ -1,0 +1,1218 @@
+pico-8 cartridge // http://www.pico-8.com
+version 14
+__lua__
+
+
+actors = {}
+tile_size = 8
+patterns = {}
+
+disk = nil
+
+graves = {{x = 11, y = 2}, {x = 9, y = 6}} -- todo: update when updating map
+
+-- sprite flag 1 means actors collide
+
+music(20, 0, 3)
+
+function _init()
+
+  sala = 0
+  complete={false, false, false, false, false} --nro da sala e' indice
+  ch_room(sala)
+
+  srand(flr(time()))            -- todo: may not be random
+
+
+end
+
+portals = {}
+function inits0() --hub
+  ply = make_actor(8*6, 8*6)
+  ply.sprite = 3
+  ply.can_be_hurt = true
+  ply.hp = 5
+  ply.dir_x = 1
+  ply.dir_y = 1
+  if(complete[1] == true and complete[2] == true and complete[3] == true and complete[4] == true) then
+    sfx(43, 1)
+	end
+
+
+  --local pos = {{x=2, y=4},{x=9, y=3},{x=2, y=8},{x=9, y=8}} --portal 1,2,3,4
+  local pos = {{2, 4}, {9, 4}, {2, 8}, {9, 8}}
+
+  for i = 1, 4 do
+    local port = make_actor(pos[i][1] * 8, (pos[i][2] - 1) * 8)
+    port.room = i
+    port.can_interact = true
+    port.sprite = 36
+    port.spr_w = 1
+    port.spr_h = 2
+    port.spr_fx = false
+    port.spr_fy = false
+    port.t = rnd(20)
+    port.complete = complete[i]
+  end
+
+  room = {{0, 0}, {15 * 8, 15 * 8}}
+
+end
+
+triggers = {}
+
+function inits1() --bullet hell
+
+  music(0, 0, 3)
+
+  ply = make_actor(5 * 8, 3 * 8)
+  ply.sprite = 3
+  ply.can_be_hurt = true
+  ply.hp = 5
+
+  -- make_pattern(freq, n_sides, ang_dist, vel, dir)
+  make_pattern(3, 3, 0.3, 2, 1)
+  make_pattern(4, 5, 0.4, 2.5, -1)
+  make_pattern(4, 5, 0.4, 2.5, 1)
+  make_pattern(2, 8, 1.8, 2, 1)
+  make_pattern(2, 1, 0.8, 2, -1)
+
+  boss = make_actor(9 * 8, 8 * 8)
+  boss.sprite = 96
+  boss.spr_w = 2
+  boss.spr_h = 2
+  boss.spr_fx = false
+  boss.spr_fy = false
+  boss.triggers_active = 0
+  boss.hp = 2
+  boss.t = 1
+
+  local pos = {{1*8, 1*8, false, false}, {1*8, 13*8, false, true}, {13*8, 1*8, true, false}, {13*8, 13*8, true, true}}
+
+  for i = 1, 4 do
+    local trigger = make_actor(pos[i][1], pos[i][2])
+    trigger.can_interact = true
+    trigger.sprite = 39
+    trigger.spr_w = 2
+    trigger.spr_h = 2
+    trigger.spr_fx = false
+    trigger.spr_fy = false
+
+    add(triggers, trigger)
+  end
+
+
+--  room = {{37 * 8, 0}, {48 * 8, 33 * 8}}
+  room = {{0 * tile_size, 25*tile_size}, {32 * tile_size, 55 * tile_size}}
+end
+
+boxes = {}
+
+function inits2() --inv controls
+
+  music(0, 0, 3)
+
+	ply = make_actor(8*6, 8)
+  ply.sprite = 3
+  ply.can_be_hurt = true
+  ply.hp = 5
+  ply.dir_x = 1
+  ply.dir_y = 1
+
+  boss = make_actor(8 * 8, 8 * 8)
+  boss.sprite = 64
+  boss.spr_w = 2
+  boss.spr_h = 2
+  boss.spr_fx = false
+  boss.spr_fy = false
+  boss.timer = 150
+  boss.attack_cooldown = 60
+  boss.hp = 4
+
+  for i = 1, 5  do              -- todo: may not be random
+    local box1 = make_actor(1*8 + (i*2)*8, 4*8)
+    local box2 = make_actor(1*8 + (i*2)*8, 4*8 + (8*8))
+    box1.can_interact = true
+    box2.can_interact = true
+    box1.is_actual_box = false
+    box2.is_actual_box = false
+    box1.sprite = 70
+    box2.sprite = 70
+    add(boxes, box1)
+    add(boxes, box2)
+  end
+
+  local count = 0
+  local idx = {}
+  repeat
+    local r = rnd(#boxes) + 1
+    local f = false
+    for i = 1, #idx do
+      f = r == idx[i]
+    end
+    if f == false then
+      idx[#idx + 1] = r
+      count += 1
+    end
+  until(count == 4)
+
+  for i = 1, #idx do
+    boxes[i].is_actual_box = true
+  end
+
+  -- box1= make_actor(41*8, 4*8)
+  -- box2= make_actor(41*8+2*8, 4*8)
+  -- box3= make_actor(41*8+4*8, 4*8)
+  -- box4= make_actor(41*8+6*8, 4*8)
+  -- box5= make_actor(41*8+8*8, 4*8)
+  -- box6= make_actor(41*8, 4*8+12*8)
+  -- box7= make_actor(41*8+2*8, 4*8+12*8)
+  -- box8= make_actor(41*8+4*8, 4*8+12*8)
+  -- box9= make_actor(41*8+6*8, 4*8+12*8)
+  -- box10= make_actor(41*8+8*8, 4*8+12*8)
+
+  room = {{32 * tile_size, 24*tile_size}, {64 * tile_size, 55 * tile_size}}
+end
+
+function inits3() --spinner ball
+
+  music(0, 0, 3)
+
+	ply = make_actor(8*8, 8)
+	ply.sprite = 3
+	ply.can_be_hurt = true
+	ply.hp = 5
+
+  boss = make_actor(8 * 8, 8 * 8)
+  boss.sprite = 102
+  boss.hp = 4
+  boss.spr_w = 2
+  boss.spr_h = 2
+  boss.spr_fx = false
+  boss.spr_fy = false
+  boss.t = 1
+
+  disk = make_actor(8 * 8, 8 * 8)
+  disk.sprite = 106
+  disk.spr_w = 2
+  disk.spr_h = 1
+  disk.spr_fx = false
+  disk.spr_fy = false
+  disk.inertia = 1
+  disk.is_projectile = true
+  disk.die_on_collision = false
+  disk.timer = 30
+  disk.t = 1
+
+  -- button = make_actor(5 * 8, 2 * 8)
+  -- button.can_interact = true
+  -- button.sprite = 5
+
+  --  boss.can_create_disk = true
+
+  room = {{64 * tile_size, 24*tile_size}, {96 * tile_size, 55 * tile_size}}
+end
+
+function inits4() --grim reaper
+
+  music(0, 0, 3)
+
+  ply = make_actor(8*3, 8*2)
+  ply.sprite = 3
+  ply.can_be_hurt = true
+  ply.hp = 5
+  ply.dir_x = 1
+  ply.dir_y = 1
+
+  boss = make_actor(8 * 8, 8 * 8)
+  boss.sprite = 7
+  boss.spr_w = 2
+  boss.spr_h = 2
+  boss.spr_fx = false
+  boss.spr_fy = false
+  boss.attack_cooldown = 60
+  boss.t = 0
+  boss.hp = 2
+
+  local pos = graves[flr(rnd(#graves)) + 1]
+  grave = make_actor(pos.x * tile_size, pos.y * tile_size)
+  grave.hp = 2
+  grave.sprite = 5
+  grave.spr_w = 1
+  grave.spr_h = 2
+  grave.spr_fx = false
+  grave.spr_fy = false
+
+  room = {{96 * tile_size, 24*tile_size}, {127 * tile_size, 55 * tile_size}}
+end
+
+function inits5()	--rewards
+	ply = make_actor(8*3, 8*2)
+  ply.sprite = 3
+  ply.can_be_hurt = true
+  ply.hp = 5
+  ply.dir_x = 1
+  ply.dir_y = 1
+
+end
+
+function initsala(sala)
+  if sala==0 then
+	inits0()
+  elseif sala==1 then
+	inits1()
+  elseif sala==2 then
+	inits2()
+  elseif sala==3 then
+	inits3()
+  elseif sala==4 then
+	inits4()
+	end
+end
+
+function ch_room(newroom)
+	sfx(39, 1)
+	for a in all(actors) do
+    del(actors, a)
+  end
+
+	sala=newroom
+	initsala(sala)
+end
+
+function boss_kill()
+	complete[sala]=true
+
+  -- t = time()
+  -- for i = 1, rnd(6) do
+  --   for k = 1, rnd(8) do
+  --     for l = 1, rnd(8) do
+  --       for n = 1, rnd(3) do
+  --         spr(73 + n, boss.x + k, boss.y + l)
+  --       end
+  --     end
+  --   end
+  -- end
+
+
+  boss.sprite = 0
+  boss.spr_w = nil                  -- warn: hack
+  boss.x = 256
+  boss.y = 256
+  boss.hp = 0
+
+
+  sfx(42, 1)
+  ch_room(0)
+end
+
+function wait(a) for i = 1,a do flip() end end
+
+walk_tick_count = 0
+walk_flag = false
+function _update()
+
+  control_player(ply)
+  foreach(actors, move_actor)
+
+  walk_tick_count += 1
+  if abs(ply.dx + ply.dy) > 0 and ply.sprite != 3 then
+    if walk_tick_count >= 10 then
+      walk_flag = not walk_flag
+      ply.sprite += (walk_flag and 1 or -1)
+      walk_tick_count = 0
+
+    end
+  else
+    ply.sprite = 3
+  end
+
+
+  if sala==0 then
+    updates0()
+  elseif sala==1 then
+    updates1()
+  elseif sala==2 then
+    updates2()
+  elseif sala==3 then
+    updates3()
+  elseif sala==4 then
+    updates4()
+	end
+
+  if ply.hp <= 0 then
+    sfx(41, 1)
+    run()
+  end
+end
+
+function updates0() --hub
+  for a in all(actors) do
+    if a.can_interact != nil then
+      a.t += 1
+      local x = a.x - ply.x -- warn: circular collision
+      local y = a.y - ply.y
+      local range = 8
+      if abs(x) < (range) and abs(y) < (range) and btn(4) then
+        ch_room(a.room)
+        return
+        --del(actors, a)
+      end
+      if a.t > 10 then
+        a.t = 0
+        a.sprite = ((a.sprite - 36.5) * (-1)) + 36.5
+      end
+    end
+  end
+end
+
+frame_count = 0
+shoot_tick_count = 0
+function updates1() --bullet hell
+
+  -- frame_count += 1
+  -- if frame_count > 50 then
+  --   sfx(33, 1)
+  --   frame_count = 0
+  -- end
+
+  shoot(boss)
+
+  frame_count += 1
+  if frame_count > 50 then
+    sfx(33, 1)
+    frame_count = 0
+  end
+
+  shoot_tick_count += 1
+  if shoot_tick_count < 150 then
+    shoot(boss)
+  elseif shoot_tick_count > 160 then
+    ptn = (ptn + 1) % #patterns + 1
+    shoot_tick_count = 0
+  end
+
+  if boss.triggers_active >= 4 then
+    sfx(37, 1)
+    boss_kill()
+  end
+
+  boss.t += 1
+  -- (flr(time()) % 2 == 0) 
+  if boss.t > 6 then -- todo: tweeak
+    boss.t = 0
+    boss.sprite = ((boss.sprite - 97) * (-1)) + 97
+  end
+
+  for a in all(actors) do
+    if a.is_projectile == true then
+      local x = a.x - ply.x -- warn: circular collision
+      local y = a.y - ply.y
+      --if abs(x) < round(a.w + ply.w) and abs(y) < round(a.h + ply.y) then
+      if abs(x) < (5) and abs(y) < (5) then -- warn: fix-sized bullets
+        ply.hp -= 1 -- todo: player hit by projectile
+        sfx(40, 1)
+        if a.die_on_collision then
+          del(actors, a)
+        end
+      end
+    end
+    if a.can_interact != nil then
+	  
+      local x = a.x - ply.x -- warn: circular collision
+      local y = a.y - ply.y
+      local range = 16
+      if abs(x) < (range) and abs(y) < (range) and btn(4) then
+		sfx(34, 1)
+        a.sprite = 41
+        boss.triggers_active += 1
+        a.can_interact = nil
+        --del(actors, a)
+        --interacts1(a)
+      end
+    end
+  end
+end
+
+function updates2() --inv control
+
+  if boss.timer <= 50 then
+    boss.sprite = 66
+  end
+  if boss.timer <= 30 then
+    boss.sprite = 68
+  end
+  if boss.timer <= 15 then
+    boss.sprite = 66
+  end
+  if boss.timer <= 5 then
+    boss.sprite = 66
+  end
+
+  if boss.timer <= 0 then       -- todo: urgent outros frames de s2
+    boss.sprite = 64
+    update_dir()
+    boss.timer = 150 + rnd(300)
+    sfx(35, 1)
+  end
+  boss.timer -= 1
+
+  vel = -1.1
+  unit = sqrt((boss.x-ply.x)*(boss.x-ply.x)+(boss.y-ply.y)*(boss.y-ply.y))
+  unitx=(boss.x-ply.x)/unit
+  unity=(boss.y-ply.y)/unit
+  boss.dx = unitx*vel
+  boss.dy = unity*vel
+
+  boss.attack_cooldown += 1
+
+  for a in all(actors) do
+    if boss.attack_cooldown >= 60 then
+      if a.hp != nil and a != boss then
+        local x = a.x - boss.x -- warn: circular collision
+        local y = a.y - boss.y
+        local range = 8
+        if abs(x) < (range) and abs(y) < (range) then -- warn: fix-sized bullets
+          a.hp -= 1
+          boss.sprite = 64
+          boss.attack_cooldown = 0
+          -- if a == grave then
+          --   mset(flr(a.x / 8), flr(a.y / 8), 22)
+          -- end
+        end
+      end
+    elseif boss.attack_cooldown <= 5 then
+      boss.sprite = 68
+    elseif boss.attack_cooldown <= 10 then
+      boss.sprite = 66
+    elseif boss.attack_cooldown <= 20 then
+      boss.sprite = 68
+    elseif boss.attack_cooldown <= 30 then
+      boss.sprite = 66
+    elseif boss.attack_cooldown <= 30 then
+      boss.sprite = 64
+    end
+    if a.can_interact != nil then
+      local x = a.x - ply.x -- warn: circular collision
+      local y = a.y - ply.y
+      local range = 5
+      if abs(x) < (range) and abs(y) < (range) and btn(4) then
+        a.can_interact = nil
+        if a.is_actual_box == true then
+          boss.hp -= 1
+          a.sprite = 71
+        elseif a.is_actual_box == false then
+          a.sprite = 72
+        end
+        --del(actors, a)
+        --interacts1(a)
+      end
+    end
+  end
+
+  if boss.hp <= 0 then
+    
+    boss_kill()
+  end
+
+end
+
+function updates3() --disk
+
+  vel = -1.3
+  unit = sqrt((disk.x-ply.x)*(disk.x-ply.x)+(disk.y-ply.y)*(disk.y-ply.y))
+  unitx=(disk.x-ply.x)/unit
+  unity=(disk.y-ply.y)/unit
+  disk.dx = unitx*vel
+  disk.dy = unity*vel
+
+  disk.timer -= 1
+
+  disk.t += 1
+  if disk.t > 3 then
+    disk.t = 0
+    disk.spr_fy = not disk.spr_fy
+  end
+
+  -- boss.t += 1
+  -- if boss.t >  then
+  --   boss.t = 0
+  --   boss.sprite = ((boss.sprite - 103) * (-1)) + 103
+  -- end
+
+  --interact(button)
+
+  if disk.timer < 15 then
+    boss.sprite = 102
+  end
+
+  for proj in all(actors) do
+    if proj.is_projectile == true then
+      for a in all(actors) do
+        if not a.is_projectile and a.hp != nil then
+          local x = proj.x - a.x -- warn: circular collision
+          local y = proj.y - a.y
+          --if abs(x) < round(proj.w + ply.w) and abs(y) < round(proj.h + ply.y) then
+          if abs(x) < (5) and abs(y) < (5) and disk.timer <= 0 then -- warn: fix-sized bullets
+            a.hp -= 1 -- todo: player hit by projectile
+            if a == boss then
+              boss.sprite = 104
+            end
+            disk.x = boss.x
+            disk.y = boss.y
+            disk.timer = 30
+            --~ sfx(36, 1)
+            if proj.die_on_collision then
+              del(actors, proj)
+            end
+          end
+        end
+        if a.can_interact != nil then
+          local x = a.x - ply.x -- warn: circular collision
+          local y = a.y - ply.y
+          local range = 8
+          if abs(x) < (range) and abs(y) < (range) and btn(4) then
+            interact(a)
+          end
+        end
+      end
+    end
+  end
+
+  if boss.hp <= 0 then
+	
+	--~ sfx(38, 1)
+    boss_kill() -- todo: boss dead
+    
+  end
+end
+
+function updates4() --grim reaper
+
+  vel = -1.1
+  unit = sqrt((boss.x-ply.x)*(boss.x-ply.x)+(boss.y-ply.y)*(boss.y-ply.y))
+  unitx=(boss.x-ply.x)/unit
+  unity=(boss.y-ply.y)/unit
+  boss.dx = unitx*vel
+  boss.dy = unity*vel
+
+  if boss.dx < 0 then
+    boss.sprt_fx = true
+  else
+    boss.sprt_fx = false
+  end
+
+  if abs(boss.dx + boss.dy) > 0.01 then
+    boss.t = (boss.t + 1) % 15
+    -- if boss.t == 0 then
+    --   boss.sprite = (boss.sprite - 7) % 2 + 9
+    -- end
+    if (boss.t == 0) then
+--      if (boss.sprite == 9 or boss.sprite == 11) then
+        boss.sprite = (((boss.sprite - 8) * (-1)) + 8)
+        
+--      end
+    end
+  end
+
+  -- if abs(boss.dx + boss.dy) > 0.1 then
+  --   boss.t = (boss.t + 1) % 10
+  --   if boss.t == 0 then
+  --     if boss.sprite == 9 then
+  --       boss.sprite = 11
+  --     elseif boss.sprite == 11 then
+  --       boss.sprite = 9
+  --     end
+  --   end
+  -- end
+  -- if boss.t == 0 then
+  --   boss.sprite = ((boss.sprite - 10) * -1) + 10
+  -- end
+
+  boss.attack_cooldown += 1
+
+  if boss.attack_cooldown >= 60 then
+    for a in all(actors) do
+      if a.hp != nil and a != boss then
+        local x = a.x - boss.x -- warn: circular collision
+        local y = a.y - boss.y
+        local range = 5
+        if abs(x) < (range) and abs(y) < (range) then -- warn: fix-sized bullets
+          a.hp -= 1 -- todo: player hit by projectile
+          boss.attack_cooldown = 0
+          sfx(30, 1)
+          if a == grave then
+            grave.sprite = 6
+            boss.hp -= 1
+            sfx(31, 1)
+            --mset(flr(a.x / 8), flr(a.y / 8), 22)
+          end
+        end
+      end
+    end
+  elseif boss.attack_cooldown <= 10 then
+    boss.sprite = 11
+  elseif boss.attack_cooldown <= 30 then
+    boss.sprite = 13
+  elseif boss.attack_cooldown <= 50 then
+    boss.sprite = 9
+  end
+
+
+  if grave.hp <= 0 then
+	sfx(32, 1)
+    boss_kill() --todo: boss killed
+  end
+
+  -- for proj in all(actors) do
+  --   if proj.is_projectile == true then
+  --     local x = proj.x - ply. x-- warn: circular collision
+  --     local y = proj.y - ply.y
+  --     --if abs(x) < round(proj.w + ply.w) and abs(y) < round(proj.h + ply.y) then
+  --     if abs(x) < (5) and abs(y) < (5) then -- warn: fix-sized bullets
+  --       ply.hp -= 1 -- todo: player hit by projectile
+  --       disk.x = boss.x
+  --       disk.y = boss.y
+  --       if proj.die_on_collision then
+  --         del(actors, proj)
+  --       end
+  --     end
+  --   end
+  -- end
+
+end
+
+function updates5()
+
+
+end
+
+function interacts1(a)
+  a.is_active = true
+end
+
+function interacts3(a)
+  mset(flr((a.x + room[1][1]) / tile_size), flr((a.y + room[1][2]) / tile_size), 22)
+end
+
+function update_dir()
+  if rnd(100) < 50 then
+    ply.dir_x *= -1  -- todo: update dir
+  end
+  if rnd(100) < 50 then
+    ply.dir_y *= -1  -- todo: update dir
+  end
+end
+
+ptn = 1
+timer = 0
+function shoot(a)
+  timer += 1
+  t = time()
+  if timer > patterns[ptn].freq then
+    n = patterns[ptn].n_sides
+    for i = 1, n  do
+      bul = make_bullet(a)
+
+      res = patterns[ptn].ang_dist
+      vel = patterns[ptn].vel
+      theta = (t + (3.141592 * (i/n)))
+      bul.dx = cos(theta * res) * vel * patterns[ptn].dir
+      bul.dy = sin(theta * res) * vel
+    end
+    timer = 0
+  end
+end
+
+
+function make_bullet(a)
+  bul = make_actor(a.x + 6, a.y)
+  bul.sprite = 100 + (flr((a.x + a.y)*100) % 2)
+  bul.inertia = 1
+  bul.w = tile_size * 0.15
+  bul.h = tile_size * 0.15
+  bul.die_on_collision = true
+  bul.is_projectile = true
+  return bul
+end
+
+function _draw()
+  cls()
+  --circfill(20, 80, 2)
+  m_cmr_off = 0 -- max camera offset after border
+  cmr_off = 64 -- put char in center of screen
+  map_start_x = room[1][1]
+  map_start_y = room[1][2]
+  map_end_x = room[2][1]
+  map_end_y = room[2][2]
+  if ply != nil then
+  
+	camX=clamp(ply.x - cmr_off, -m_cmr_off, m_cmr_off + map_end_x - map_start_x - cmr_off * 2 + tile_size)
+	camY=clamp(ply.y - cmr_off, -m_cmr_off, m_cmr_off + map_end_y - map_start_y - cmr_off * 2 + tile_size)
+    camera(clamp(ply.x - cmr_off, -m_cmr_off, m_cmr_off + map_end_x - map_start_x - cmr_off * 2 + tile_size),
+           clamp(ply.y - cmr_off, -m_cmr_off, m_cmr_off + map_end_y - map_start_y - cmr_off * 2 + tile_size))
+  end
+  --camera(clamp(120 - 64, 0, 127), clamp(120 - 64, 0, 127))
+  map(flr(map_start_x/8), flr(map_start_y/8), 0, 0, flr(map_end_x/8) + 1, flr(map_end_y/8) + 1)
+  foreach(actors, draw_actor)
+  draw_actor(boss) -- todo: cludge
+  draw_actor(ply)
+
+  for i = 1, ply.hp do
+    t = 6
+    spr(1, t*i + camX - t, camY)
+  end
+
+  if boss != nill then
+    for i = 1, boss.hp do
+      t = 8
+      spr(38, 128 - t*i + camX, camY)
+    end
+  end
+
+  --circfill(64, 64, 2, 7)
+  --circfill(grave.x, grave.y, 2, 7)
+  --print(ply.hp, 0, 80, 7)
+end
+
+
+function draw_actor(a)
+  if a != nil then
+    if a.spr_w == nil then
+      spr(a.sprite, a.x, a.y) -- warn: work directly in pixel space. maybe change
+      if a.complete != nil then
+        spr(74, a.x + 4, a.y + 12)
+      end
+    else
+      spr(a.sprite, a.x, a.y, a.spr_w, a.spr_h, a.spr_fx, a.spr_fy)
+    end
+  end
+
+end
+
+function move_actor(a)
+
+  if not will_move_collide(a, a.dx, 0) then -- there's a reason to separate these
+    a.x += a.dx
+  elseif a.die_on_collision then
+    del(actors, a)
+  end
+  if not will_move_collide(a, 0, a.dy) then
+    a.y += a.dy
+  elseif a.die_on_collision then
+    del(actors, a)
+  end
+
+  a.dx *= a.inertia
+  a.dy *= a.inertia
+
+  if abs(a.dx) < 0.1  then
+    a.dx = 0
+  end
+
+  if abs(a.dy) < 0.1  then
+    a.dy = 0
+  end
+end
+
+
+function control_player(pl)
+  accel = 0.8 -- player speed
+  if (btn(0)) then
+    ply.sprite = 32
+    pl.dx -= accel * (ply.dir_x or 1)
+  end
+  if (btn(1)) then
+    ply.sprite = 16
+    pl.dx += accel * (ply.dir_x or 1)
+  end
+  if (btn(2)) then
+    ply.sprite = 34
+    pl.dy -= accel * (ply.dir_y or 1)
+  end
+  if (btn(3)) then
+    ply.sprite = 18
+    pl.dy += accel * (ply.dir_y or 1)
+  end
+  -- if (btn(4)) then
+  --   -- boss.dir_x *= -1
+  --   -- boss.dir_y *= -1
+  --   -- if ptn == 2 then
+  --   --   ptn = 1
+  --   -- else
+  --   --   ptn = 2
+  --   -- end
+  -- end
+end
+
+-- collision --------------------------
+
+function is_pixel_solid(x, y)
+  val = mget(round(x / 8), round(y / 8))
+  return fget(val, 1) -- solid if flag 1 is set
+end
+
+function is_area_solid(x, y, w, h)
+  return is_pixel_solid(x-w, y-h) or is_pixel_solid(x+w, y-h) or
+         is_pixel_solid(x-w, y+h) or is_pixel_solid(x+w, y+h)
+end
+
+function will_move_collide(a, dx, dy)
+  return is_area_solid(a.x+dx + room[1][1], a.y+dy + room[1][2], a.w, a.h)
+end
+
+-- make ----------------------------------------------------
+
+function make_pattern(freq, n_sides, ang_dist, vel, dir)
+
+  pattern = {
+    freq = freq,
+    n_sides = n_sides,
+    ang_dist = ang_dist,
+    vel = vel,
+    dir = dir
+  }
+
+  add(patterns, pattern)
+end
+
+function make_actor(x, y)
+  a = {}
+  a.x = x
+  a.y = y
+  a.dx = 0
+  a.dy = 0
+  a.spr = 16
+  a.w = tile_size * 0.4
+  a.h = tile_size * 0.4
+  a.inertia = 0.5
+  a.die_on_collision = false
+  a.is_projectile = false
+  a.can_be_hurt = false
+
+  add(actors, a)
+
+  return a
+end
+
+ -- math ---------------------------
+epsilon = 0.0000152587890625
+
+function ceil(n)
+	return flr(n + 1 - epsilon)
+end
+
+function round(n)
+  return flr(n + 0.5 - epsilon)
+end
+
+function clamp(val, low, high)
+  temp = val
+  if(temp > high) temp = high
+  if(temp < low) temp = low
+  return temp
+end
+
+function mod(a, b)
+  return a - flr(a/b) * b
+end
+
+
+
+__gfx__
+0000000000000000dddddddd0044444000444040777766dd838888880000011777700000000001110000000000000111000000000000011100000000dddddddd
+00000000000000007d67d66d0444444404f4444457766dd53388888800001111177770000000111777700000000011177770000000001111110000007d67d66d
+0070070000800800dddddddd00f3f3f000f3f3f057766d55888888880000161611177700000016161777700000001777711000000000161611100000dddddddd
+0007700000788800d6d76d6600fffff00ffc8cff577665d5888888880000186811107700000018681117770000007778111000000000186811100000d6d16d66
+0007700000888100dddddddd011555110115551157766dd5888888880000166610104700000016661010770000077766101000000000166610100000ddd1dddd
+00700700000810007d76d66d0f11111f0011111057766dd58888888800001116100400000000116610004700007771161000000000001116104000007d16d66d
+0000000000000000dddddddd0044a4400044a44055766dd5888888880000011111700000000011111104000000770111140000000000011114000000d11ddddd
+0000000000000000d7d66d76001000100010001057766dd588888888000001111400000000000111117000000777011171000000000001117100000017d16d76
+044444040444440400444440004444400066660057766dd5555555550000011140000000000001111400000007770114100000000000011410000000dd1ddd1d
+44444440444444400444444404444444066dd66057766dd55555555500000117100000000000011140000000077701411000000000000141100000007167d16d
+0aff3f000aff3f0000f3f3f000f3f3f006dddd6057766dd5555555550000014111000000000000171000000007770711110000000000071111000000dd1dd1dd
+0ffff8000ffff80000ff8ff000ff8ff0066dd66057766d55555555550000011111000000000000411100000007774111110000000007411111000000d6d11d66
+01111d0011111d0f0f1555110115551f066dd66057766dd5555566d50000001111000000000000111100000007770011110000000007701111000000dddd1ddd
+11111100f11111100111111000111111066dd66057766dd5557766dd00000111110000000000011111000000007771111100000000077711110000007d76d16d
+f4444a0004444a000044a4400044a4400666666057766dd5557766dd0000011111000000000001111100000000777771110000000000777711000000dddddddd
+01000100100000100000001000100000dddddddd777766dd577766dd0000111111110000000011111110000000077777711100000000117777110000d7d66d76
+4044444040444440004444400044444055dddd5555dddd55000000006666666666666666000000000000000088888888d3ddddddddddddd3d3dddd3ddddddddd
+044444440444444404444444044444445dd11dd55dd11dd5000000006dddddddddddddd60000000000000000888888887d37d66d7d63d6337337d63d7d67d661
+00f3ffa000f3ffa000faaaf000faaaf0dd1111dddd1111dd007666006d666666666666d6000000000000000088888888dd33dddddd33333ddd3dd3ddddddd11d
+008ffff0008ffff000fffff000fffff0d11ccc1dd111111d078668506d66dddddddd66d6dddddddddddddddd88888888d3d33d66d3376336d6376366d6d71d66
+00d11110f0d111110f1111110111111fd1c666cdd111111d006665006d66d666666d66d6d11111111111111d88888888ddddd3333dddd3ddddd33d3dddddd1dd
+001111110111111f0011111f0f111110dc666c1dd1cccc1d000650006d66d666666d66d6d1dddddddddddd1d888888887d76d6637d76d36d7d73d63d7d761611
+00a4444f00a444400044444000444440d66666cddc6666cd000650006d66d666666d66d6d1dd11111111dd1d33888888dddddddddddddddddddddddddddddddd
+00100010010000010010000000000010d667666dd666666d000000006d66d666666d66d6d1dd1dddddd1dd1d83888888d7d66d76d7d66d76d7d66d76d7d66d76
+55555555555555555555555555555555d667766dd667766d555555556d66d666666d66d6d1dd1dddddd1dd1d88888888838888888888883888888888dddddddd
+55555555555555555555555555555555d666766dd677666d555555556d66d666666d66d6d1dd1dddddd1dd1d333333338388888888888838888888887d67d66d
+55555555555555555555555555555555dc66666dd66666cd557755556d66dddddddd66d6d1dd1dddddd1dd1d88888888838888888888883888888888dddddddd
+55555555556555555555555555555556d1c666cdd6666c1d507075556d666666666666d6d1dd11111111dd1d88888888838888888888883888888888d6d71d66
+55555555555555555555555555555555dc666c1ddcccc11d577775556dddddddddddddd6d1dddddddddddd1d88888888838888888888883888888888ddd11ddd
+55566555555555555555555556555555d1ccc11dd111111d570755556666666666666666d11111111111111d888888888388888888888838888888887d16d16d
+55d66655555556655555555555555555d111111dd111111d55555555dddddddddddddddddddddddddddddddd88888888838888888888883833333333ddd1dd1d
+55dddd55555566d555555555555555555d1111d55d1111d555555555dddddddddddddddddddddddddddddddd88888888838888888888883888888888d7166d16
+000000fff000000000cc0fff000bb0000022000fff01100000000000000000000000000000000000000000000000000099999999999999999999999999999999
+00000fffff0000000cc0f717f000bb00022000f717f01100008888000000000000000000000000000000a00000a090a079a79aa9999999999999999999999999
+00000f717f0000000c00f717f0000b00020000f717f001000887888000222200009999000000a000000a9a000000000099999999999999999999a99999999999
+00000fffff0000000000fffff0000000000000fffff000008878888802262220099a9990000a9a0000a909a0009000909a97a9aa999999999997a999999aa999
+000000fff000000000f00f8f0000f00000f0000f8f00f000288888822262222299a999990000a000000a9a0000000000999999999999999999aaaa9999aaa799
+0000000f0000000000ff0080000ff00000ff0000800ff000d288882dd222222dd999999d000000000000a00000a090a0797a9aa99999999999a7aaa99a7aaa99
+0000fffffff00000e00fffffffff00a0300fffffffff00400d2222d00d2222d00d9999d000000000000000000000000099999999999999999aaaa7a999999999
+000fffefefff0000ee00ffefeff00aa03300ffefeff0044000dddd0000dddd0000dddd00000000000000000000000000979aa97a99999999aa7aaaa799999999
+00ff00fff00ff0000ee000fff000aa00033000fff0004400999999aa999999aaaaaaaaaaaaaaaaaaaa999999aaaaaaaa88888888888888889999999999999999
+00f000fff000f000000000fff0000000000000fff0000000999999aa999999aaaaaaaaaaaaaaaaaaaa999999aaaaaaaa833333333333333899a9999999999999
+000009999900000000000999990000000000099999000000999999aa999999aa999999aa99999999aa999999aa9999998388888888888838999999999997a999
+000099000990000000009990999000000000999099900000999999aa999999aa999999aa99999999aa999999aa999999838888888888883899999799998a8a99
+000099909990000000099900099900000009990009990000999999aa999999aa999999aa99999999aa999999aa99999983888888888888389999999999aaaa99
+000009909900000000099000009900000009900000990000999999aa999999aa999999aa99999999aa999999aa999999838888888888883899a9999999a9a999
+000000000000000000000000000000000000000000000000aaaaaaaa999999aa999999aa99999999aa999999aa99999983888888888888389999999999999999
+0000ddddddd00000000ddddddddd0000000ddddddddd0000aaaaaaaa999999aa999999aa99999999aa999999aa99999983888888888888389999999999999999
+000066d00d660000000066d00d660000000000008888888800006669966600000000666996660000000066666666007783888888888888380000000000000000
+000d66d77d66d000000d66d77d66d0000000000088888888000dddddddddd000000dddddddddd00000666dddddd6660783888888888888380000000000999900
+0006666776666000000666677666600000099000888878880dd7777777777dd00dd7777777777dd0066dd777777dd6608388888888888838009999000977aa90
+000655666655600000065566665560000097a900888888880776666666666770077666666666677066d7777777777d6683888888888888380977aa900977aa90
+00065766667560000006526556256000009a99008888888806555666666555600655566666655560d66dd777777dd66d83888888888888380977aa9009aaaa90
+000d66655666d000000d66577566d000000990008a888888d65756666665756dd65756666665756d0d666dddddd666d0838888888888883879aaaa9779aaaa97
+0000d656656d00000000d656756d000000000000888888a8d66667566576666dd66667566576666d70dd66666666dd00838888888888883879aaaa9770999907
+000777755777700000077775577770000000000088888888d66667566576666dd66667566576666d7700dddddddd000083888888888888387799997777000077
+000555555555500000055555555550000000000088888888d66675666657666d966675666657666999999999aa99999983888888888888380777777007777770
+0006666666666000000666666666600000000000888888889666675555766669966667555576666999999999aa99999983888888888888380076760000767600
+0006666666666000000657566575600000099000888888889666666aa66666690666666aa666666099999999aa999999838888888888883800766d0000766d00
+000655566555600000065756657560000099a900888888880666666666666660066666666666666099999999aa999999838888888888883800766d0000766d00
+00066665566660000006666556666000009a7900888888880666665555666660066666555566666099999999aa999999838888888888883800766d0000766d00
+0006665665666000000666566566600000099000888888880d666677776666d00d666655556666d099999999aa999999838888888888883807766dd007766dd0
+000d66566566d000000d66566566d00000000000888888880dddddddddddddd00dddddddddddddd0aaaaaaaaaaaaaaaa833333333333333877766ddd77766ddd
+00dddddddddddd0000dddddddddddd000000000088888888ddddddddddddddddddddddddddddddddaaaaaaaaaaaaaaaa8888888888888888776666dd776666dd
+20232323232333332323232323232323232323232323232323232323232323232023232323233333232323232323232323232323232323232323232323232323
+20232323232333502323232323232323232323232323232323232323232323232023232323333323232323232323232323232323232323232323232323232320
+20232323232323032323232323232323232323232323232323232323232323232023232323232303235023232323232323232323232323232323232323232323
+20232323232323512323232323232323232323232323232323502323232323232023232323230323232323232323232323232323232323232323232323232320
+20232323232323232323232323232323232323232323502323232323232323232023232323232323235123232323232323232323232323232323232323232323
+20232323232323232323232323232323232323232323232323512323232323232023232323232323232323232323232323232323232323232323232323232320
+20232323232323232323232363232323232323232323512323232323232323232023232323232323232323236323232323232323232323232323232323232323
+20232323232323232323232363232323232323232323232323232323232323232023232323232323232323632323232323232323232323232323502323232320
+2023232323232323502323233323232323232323132323236323232303232323f123232323232323232323233323232323232323132323236350232303232323
+f123232323232323232323233323232323232323132323236323232303232323f1232323232323232323233323232323232323132323236323235103232323f1
+f2232323231323235123232323232313232323232323232323232323232323232023232323132323232323232323231323232323232323232351232323232323
+20232323231323232323232323232313232323232323232323232323232323232023232313232323232323232323132323232323232323232323232323232320
+2023232323232323232323232323232323232323232323232323232323232323f223232323232323232323232323232323232323232323232323232323232323
+f223232323232323232323232323232323232323232323232323232323232323f2232323232323232323232323232323232323232323232323232323232323f2
+20232323232323232323232323232323232323232323232323232323232323232023232323232323232323232323232323232323232323232323232323232323
+20232323232323232323232323232323232323232323232323232323232323232023232323232323232323232323232323232323232323232323232323232320
+20232323230323232323232333232323232323032323232323232323232323232023232323032323232323233323232323232303232323232323232323232323
+20232323230323232323232333232323232323032323232323232323232323232023232303232323232323332323232323230323232323232323232323232320
+20232323232323232323231323232323232323232323232323232323232323232023232323232323232323132323232323232323232323232323232323232323
+20232323232323232323231323232323232323232323232323232323232323232023232323232323502313232323232323232323232323232323232323232320
+f323232323232323232323232333232323232323232323232323232333232323f123232323232323232323232333232323232323232323232323232333232323
+f123232323232323232323232333232323232323232323232323232333232323f1232323232323235123232333232323232323232323232323235033232323f1
+20232323232323232323232323232323232323232323231350232323232323232023232323232323232323232323232323232323232323132323232323232323
+20232323232323232323232323232323232323232323231323232323232323232023232323232323232323232323232323232323232313232323512323232320
+20232323232323232323232323232323232363232323232351232323232323232023232323232323232323232323232323236323232323232323232323232323
+20232323232323232350232323232323232363232323232323232323232323232023232323232323232323232323232323632323232323232323232323232320
+2023232313232323232303232323232323232323232323232323232323612323f023232313232323232303232323232323232323232323232350232323612323
+f023232313232323235103232323232323232323232323232323232323612323f0232313232323232303232323232323232323232323232323232323612323f0
+2023232323232323232323232323232323232323232323232323232323232323f123232323232323232323232323232323232323232323232351232323232323
+f123232323232323232323232323232323232323232323232323232323232323f1232323232323232323232323232323232323232323232323232323232323f1
+f2232323232323632323232323232323132323232323232323232323232323232023232323232363232323232323232313232323232323232323232323232323
+20232323232323632323232323232323132323232323232323232323232323232023232323236323232323232323231323232323232323232323232323232320
+20232323232323232323232323505023232323232333232323230323232323232023232323232323232323235023232323232323233323232323032323232323
+20232323232323232323232323232323232323232333502323230323232323232023232323232323232323232323232323232323332323232303232323232320
+2023232323232323232323232351512323232323232323232323232323232323f223232323232323232323235123232323232323232323232323232323232323
+f223232323232323232323232323232323232323232351232323232323232323f2232323232323232323232323232323232323232323232323232323232323f2
+2023232333232323232323232323232323232323236323232323232323232323f123232333232323232323232323232323232323236323232323232323232323
+f123232333232323232323232323232323232323236323232323232323232323f1232333232323232323232323232323232323236323232323232323232323f1
+20232323232323502323232323032323232323232323232323232323232323232023232323232323232323232303232323232323232323232323232323232323
+20232323232323232323232323032323232323232323232323232323232323232023232323232323232323230323232323232323232323232323232323232320
+20232323232303512323232323232323232323232323232313232323236123232023232323230323232323232323232323232323232323231323232323612323
+20232323232303232323232323232323232323232323232313232323236123232023232323032323232323232323232350232323232323132323232361232320
+20232361232323232323236323232323232333232323232323232323232303232023236123232323232323632323232323233323232323232323232323230323
+20232361232323232323236323232323232333232323232323232323232303232023612323232323232363232323232351332323232323232323232323032320
+f1232323232323232323232323232323232323232323232323232323232323232023232323232323232323232323232323232323232323232323232323232323
+20232323232323232323232323232323232323232323232323232323232323232023232323232323232323232323232323232323232323232323232323232320
+2020f020202020f2202020f3202020f020202020f2202020f1f0202020f320202020f020202020f2202020f3202020f020202020f2202020f1f0202020f32020
+2020f020202020f2202020f3202020f020202020f2202020f1f0202020f3202020f020202020f2202020f3202020f020202020f2202020f1f0202020f3202020
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+
+__gff__
+0000020000020000000000000000000200000000000200000000000000000002000000000000000000000000020202020000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+__map__
+02022c2d2e02021f0202022e022c2d02f1e0e0e0e0e0e0e0f1f1e0f1e0e0e0e04c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+02323232323232323232323232323202f1e0e0f1f1e0e0e0e0e0e0e0e0e027e04c5b5959595959595959595959595959595959595959595959595959595959595959595959595959595959595959584c000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+02321633323232323232313232363202f1e0e0f1f1e0e0e0f1e0e0e027e027e04c5a4d4e4d4d4d4d4d4d4d4d4d4e4d4d4d4d4d4d4d4d4d4d4d4d4d4f4d4d4d5e4d4d4d4f4d4d4d4d4d4d4d4d5e4d574c000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+1f323232323232323232323232323202f1e0e0f1f1e0e0e0f1e0e0e027e0e0e04c5a4d4d4d4d4d4d4d5e4d4d4d4d4d4d4d4d4d4d4f4d4d4d4e4d4d4d4d4d4d4d4d4d4d4d4d4d4d5f4d4d4d4f4d4d574c000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+02323232323232323232323232323202f1e0e0f1f1e0e0e0f1e0e0e0e0e0e0f14c5a4d4d4d4d4d4d4d4d4d4d4d4d4d4d4e4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d5f4d4f4d4d4d4d4d4d4d4d574c000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+02323632323232323232323232313202f1e0e0f1f1e0e0e0e0e0e027e0e0e0f14c5a4d4d4d4d5f4d4d4d4d5e4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d5f4d4d4d4f4d4d4d4d4d4d4d4d4d5e4d4d4d5f574c000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+02323232313232323230323232323202f1e0e0f1f1e0e0e0e0e0e027e0e0e0f14c5a4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d5f4e4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d574c000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0232323232323232323232320532322ff1e0e0f1f1e0e0e0e0e0e0e0e0e0e0f14c5a4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4f4d4d4d4d4d4d4d4d4d4d4d4e4d4d4d4f4d574c000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+3f30323232323232323232321532321fe0e0e0f1f1e0e0e0e0e0e0e0e0e0e0f14c5a5f4d4d4e4d4d5e4d4d5f4d4d4d4e4d4d4d4d4d4f4d4d5f4d4d4d4d4d4d4d4d4d4d4e4d4d4d4d4d4d4d4d4d4d574c000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+2f323232323232323232323232333202e0e0e0f1f1e0e0e0e0e0e0e0e0e0e0f14c5a4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d5c3b3b3b5d4d4d574c000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+02323232323230323232323232323202e0e0e0f1f1e0e0e0e0e0e0e0e0e0e0274c5a4d4d5c3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b067575753d4d4d574c000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+02323236323232323232323232323202e0e0e0f1f1e0e0e0e0e0e0e0e0e0e0274c5a4d4d6c75756575757575757575757565757575757575757575757575657575757565757575757575753d4d4d574c000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+02320532323232323231323232323202e0e0e0f1f1e0e0e0e027e0e0f1e0e0274c5a4d4d7c3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e2b7575653d4d4d574c000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0232153232323232323232323616322fe0e0e0f1f1e0e0e0e027e0f1f1e0e0274c5a4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d7c3e3e3e7d4d4e574c000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+02333232323232323232323232323202e0e0e0f1f1e0e0e0e027e0f1f1e0e0274c5a4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4f4d4d4d4d4d4d4f4d4d4d4d4d4d4d4d4d4d4d4d574c000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+020f020202021f02020202020f020202e0e0e0f1f1e0e0e0e027e0f1f1e0e0274c5a4d4d4d4d4d4d4d4d4d5e4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4f4d4d4d4d4d574c000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+e0e0e0e0e0e0e0e0e0e0e0f1e0e0e0e0e0e0e0f1f1e0e0e0e02727f1f1e0e0f14c5a4d4d4d4d4d4d4d5f4d4d4d4d4d4d5f4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d5e4d4d4d4d4d4d4d4d5e4d574c000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0f1f1e0e0e0e02727f1f1e0e0f14c5a4d5f4d4d4d4d4d4d4d4d4d4d5e4d4d4d4d4f4d4d4d4d4d4d4d4d4d4d4e4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d574c000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+f1f1f1f1f1f1f1f1f1f1f1f1f1e0e0e0e0e0e0f1f1e0e0e0e02727f1f1e0e0f14c5a4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d5e4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d5e4d4d4d4d574c000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+f1f1f1f1f1f1e0e0e0e0e0e0e0e0e0e0e0e0e0f1f1e0e0e0e02727f127e0e0f14c5a4d4d4d4d4d4d4d4d4d4e4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d574c000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+f1f10000e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0f1f1e0e0e0e02727f1f1e0e0f14c5a4d4d4d4d4d4d4d4d4d4d4d4d4d4d4f4d4d4d4d4d4d4d4d4d4d4d4e4d4d4d5e4d4d5e4d4d4d4e4d4d4d4d4f4d574c000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+f1000000e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0f1f1e0e0e0e02727f1f1e0e0f14c5a4d4d4d4d5f4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4e4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d574c000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+f100000000000000f1f10000e0e000e0e0e0e00000000000002700f1f1e0e0f14c7b7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a564c000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+f1f1f1f1f1f1f1f1f1f1f1f10000000000000000000000000000000000e000f14c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+023f022c2d02021f0202022e02020202022e022c2d020f022c2d02022e02021f023f022c2d02021f0202022e02020202022e022c2d020f022c2d02022e02021f023f022c2d02021f0202022e02020202022e022c2d020f022c2d02022e02021f02022c2d02021f0202022e02020202022e022c2d020f022c2d02022e02021f02
+0232323232323232323232323232323232323232323232323232323232323232023232323232323232323232323232323232323232323232323232323232323202323232323232323232323232323232323232323232323232323232323232320232323232323232323232323232323232323232323232323232323232323202
+0232323232323232323232323232323232333232323232323232323232323232023232323232323232323232323232323233323232323232323232323232323202323232323232323232323232323232323332323232323232323232323232320232323232323232323232323232323233323232323232323232323232323202
+0232303232323232323232323232323232323232323632323230323232323132023230323232323232323232323232323232323232363232323032323232313202323032323232323232323232323232323232323236323232303232323231320230323232323232323232323232323232323232363232323032323232313202
+1f323232323232323032323232323232323232323232323232323232323232322f323232323232323032323232323232323232323232323232323232323232322f323232323232323032323232323232323232323232323232323232323232322f3232323232323032323232323232323232323232323232323232323232322f
+0232323232323232323232323632323232323232323232323232323232163232023232323232323232323232363232323232053232323232323232323216323202323232323232323232323236323232323232323232323232323232321632320232323232323232323232363232323232323232323232323232323216323202
+3f32323232323232323232323232053231323232323232323232323232323232023232323232323232323232323232323132153232323232323232323232323202323232323232323232323232323232310532323232323232323232323232320232323232323232323232320532323132323232323232323232323232323202
+02321632323232323232323232321532323232323232323332323232323132320f321632323232323232323232323232323232323232323332323232323132320f321632323232323232323232323232321532323232323332323232323132320f1632323232323232323232153232323232323232323332323232323132320f
+__sfx__
+010c00000c0430c04300000000003c6150c04300000000000c043000000c043000003c6150000000000000000c0430c04300000000003c6150c043000000c0430c0430c043000000c0433c61500000000000c043
+010c00001852318535185251d5051d5251f53521525185351852518525185251f505295251f535185251d525000051d5251d5351850518525215251f5251d525000051d5351d5250000529525265252653521525
+010c00001a5231a5351a525000031a5231a5351a525000031a5231a5351a525000031a5231a5351a525000031a5231a5351a525000031d5251f535215251a5351a5251a5251a525000051d5251f535185251d525
+010c0020000051d5251d5350000518525215251f5251d525000051d5251d5351f0001a52523525215251f525140001f5251f52524005295252652526535215252152521505215352150521535215052153500005
+010c00000210502000021050000009105071050510502005021050210502105000000510507105001050510502135020450213500000051350913507145020450213502135021350000005135071350013505135
+010c0000021050513505045000000c135151350704505135000000514505035000051303511035101451103500000111451103500005110350e0350e145090250902509005090250900509025090050c10509005
+010c00001a0001a0001a0001a0001a0001a0001a0001a0001a0001a0001a0001a0001a000180001a0001c000180001c0001c0001a0001c0001c0000c003120000c0430c0030c0430c0030c0430c0030c0430c003
+010c0000021350204002135000000913507145051350204502135021350213500000071350913500135051350510505135050450000011035001350704505135000000514505035000051d0350e0350e14515035
+010c00001a0101a0101a0101a0101a0101a0101a0101a0101a0101a0101a0101a0101a010180101a0101c010180001c0101c0101a0001d0101d0101d0101d0101d0101d0101d0101d0101d0101d0101d0101d010
+010c00001d0101d0101d0101d0101d0101d0101d0101d0101d0101d0101d0101d0101d0101c0101d0101f010180001f0101f0101a000210102101021010210102101021010210102101021010210102101021010
+010c0000210102101021010210102101021010210102101021010210102101021010210101f01021010230101800023010230101a000240102401024010240102401024010240102401024010240102401024010
+010c0000240102401024010240102401024010240102401024010240102401024010240102301024010260101800026010260101a000280102801028000280202800028020280002802028000280202800028020
+010c00202101021010240000000021010210102400024000240102400024010240002401024000240002400026010240102400026010240102400026010240102601026010240002801026010240002401024010
+001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+011000000b0000000012000000000e0000c000140000c0000b0000c000120000c0000e0000c000140000c0000b0000c000120000c0000e0000c000140000c0000b0000c000120000c0000e0000c0001400000000
+011000000b03001000120301d0000e0302100014030240000b0300f00012030120000e03016000140300e0000b03001000120301d0000e0302100014030000000b0300f00012030120000e03016000140300e000
+011000000f5450f5450f5450f5450f5450f5450f5450f5450f5450f5450f5450f5450f5450f5450f5450f5450f5450f5450f5450f5450f5450f5450f5450f5450f5450f5450f5450f5450f5450f5450f5450f545
+011000000e5450e5450e5450e5450e5450e5450e5450e5450e5450e5450e5450e5450e5450e5450e5450e5450e5450e5450e5450e5450e5450e5450e5450e5450e5450e5450e5450e5450e5450e5450e5450e545
+011000000f5500f5000f5000f5500f5000f5000f5500f5000f5000f5500f5000f5000f5500f5000f5000f5500f5000f5000f5500f5000f5000f5500f5000f5000f5500f5000f5000f5500f5000f5000f5500f500
+011000000e55001000000000e550010000e5000e55001000014000e55001000000000e55001000000000e55001000000000e55001000000000e55001000000000e55001000000000e55001000000000e55000000
+011000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+011000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+011000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+01050000106301d6302d6303b2563b2563b2463b2463b2463b2363b2363b2363b2263b2263b2263b2163b2163b2163b2163b3003b2003b2003020030000000000000500000000000000000000000000000000000
+011800001265012640126301262012610000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+011200000d2530d2530d2530d2530d2530d2530d2530d2530d2530d2530d2530d2530d2530d2530d2530d25300000000000000000000000000000000000000000000000000000000000000000000000000000000
+010a00051665314653126530f6530d653290002800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+010600002905030050000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+01060000175501555017550155501355015550135501555011550135501155013550115500e550105500e550175501555017550155501355015550135501555011550135501155013550115500e550105500e550
+010a000414654126540f6540d65400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+010a00000255002550025500255002550025500255002550025500255002550025500255002550025500255002550025500255002540025400253002530025200252002510025100251002510025100251002510
+010700200041300123004130012300413001230041300123004130012300413001230041300123004130012300413001230041300123004130012300413001230041300123004130012300413001230041300123
+01080000185561a5561c5561d5561f556215562355600500005000050000500005000050000500005000050000500005000050000500005000050000500005000050000500005000050000500005000050000500
+010500000945309453094330944309423004030040300403004030040300403004030040300403004030040300403004030040300403004030040300403004030040300403004030040300403004030040300403
+011a00001f7521f7521f7522175221752217522375223752237522375223752217521f7521f7521d7521c7521c7521a7521875218752187421873218722187121871218702187021870218702187021870218702
+010a00002315523105231552310523155211002315023150231502315021150211502315023140231302313023120231202311023110231022310223102231022310223102231022310023104231002310000000
+011b00000075000750007500075000750007500075000750007500075000750007500c7500c7500c7500c750007500c7500c750007500c7500c7500c7500c750007500c7500c7500c7000c7500c7000c7500c700
+011b00201a7221a7321a7221d7021f72221732237221a7321a7221a7221a7221f7022b722217321a7221f722007021f7221f732187021a72221722237221f7221f7031f7321f7220070229702267022670221702
+011000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+__music__
+00 40020446
+00 40030546
+00 00010708
+00 00010709
+00 0001070a
+00 0001070b
+03 0001070c
+00 41424344
+00 41424344
+00 41424344
+00 41424344
+00 41424344
+00 41424344
+00 41424344
+00 41424344
+00 41424344
+00 41424344
+00 41424344
+00 41424344
+00 41424344
+00 16424344
+00 16424344
+00 16174344
+00 16184344
+00 16174344
+00 16184344
+00 16194344
+00 161a4344
+00 16194344
+02 161a4344
+00 41424344
+00 41424344
+03 2b2c4344
+00 41424344
+00 41424344
+00 41424344
+00 41424344
+00 41424344
+00 41424344
+00 41424344
+00 41424344
+00 41424344
+00 41424344
+00 41424344
+00 41424344
+00 41424344
+00 41424344
+00 41424344
+00 41424344
+00 41424344
+00 41424344
+00 41424344
+00 41424344
+00 41424344
+00 41424344
+00 41424344
+00 41424344
+00 41424344
+00 41424344
+00 41424344
+00 41424344
+00 41424344
+00 41424344
+00 41424344
+

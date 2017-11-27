@@ -1,0 +1,7 @@
+Título: Unbestowed
+
+Controls: setas de movimento
+
+Plot: Um pequeno jogo sobre a descoberta de um gigante monstro e a posterior descoberta de como o derrotar numa epica batalha de engenho.
+
+

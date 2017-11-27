@@ -1,0 +1,14 @@
+STELLAR
+Saboteurs, 2017
+
+DESCRIÇÃO
+
+Numa sociedade distópica, a tua missão é descobrir novos planetas para levar a Humanidade a bom porto. Será que és capaz de equilibrar toda a potência da tua nave para chegar mais longe sem morrer? Utiliza a tua sabedoria e reflexos rápidos para explorar o Universo.
+
+COMO JOGAR
+
+O botão "X" controla o primeiro propulsor, o botão "O" o segundo. Tenta acelerar o máximo possível sem chegar ao limite, no final da barra.
+
+Tens um limite de energia. Para obter mais energia, utiliza as setas direcionais quando entrares numa "Energy Surge" e acerta no padrão de setas que aparece em baixo no ecrã.
+
+Quanto mais metros longe da Terra explorares, melhor o teu resultado final!

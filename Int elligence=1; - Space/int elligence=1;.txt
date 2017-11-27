@@ -1,0 +1,32 @@
+
+	 -------------------------------
+	| TITULO : 			|
+	 -------------------------------
+
+Descoberta, ou em ingles ,"Discovery" faz com que a nossa mente pense numa coisa: o espaço. Marcados pelo presente
+com empresas como a "SPACE X" e a "NASA", mas também do passado como o clássico "SPACE INVADERS". O espaço sempre
+foi algo relacionado com descoberta e sem surpresas também cativou as nossas mentes. Por isso esse foi o mote para
+o nosso jogo. Na qual partimos numa aventura cheia de adrenalina pelo universo, onde ao longo do caminho,
+descobrindo planetas, enfrentando inimigos com raios lazer! e atravessando os bastos cintos de asteroides.
+
+
+	 --------------------------
+	|TEAM : int elligence = 1 |
+	 -------------------------
+
+	      André Amorim
+	      André Rodrigues
+              Jose Tavares
+	      Nuno Lopes
+
+	---------------------
+       | READ ME : CONTROLOS |
+        ---------------------
+
+	x = pular os menus	
+
+	x = ataque simples
+	z = ataque ultra mega poderoso
+
+	andar para a esquerda: <-
+	andar para a direita: ->

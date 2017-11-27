@@ -1,0 +1,82 @@
+codo_init
+  platform: Windows
+  Found config.txt
+  
+    01 window_size 580 540 // window width, height
+    02 screen_size 580 540 // screen width, height (stretched to window) 
+    03 show_fps 0 // Draw frames per second in the corner
+    04 windowed 0 // 1 to start up in windowed mode
+    05 window_position -1 -1 // x and y position of window, or -1, -1 to let the window manager decide
+    new window position: -1, -1
+    06 frameless 0 // 1 to use a window with no frame
+    07 fullscreen_method 1 // 0 maximized window (linux)  1 borderless desktop-sized window  2 fullscreen
+    08 foreground_sleep_ms 5 // number of milliseconds to sleep each frame. Try 10 to conserve battery power
+    09 background_sleep_ms 20 // number of milliseconds to sleep each frame when running in the background
+    10 sessions 2 // number of times program has been run
+    11 rmb_key 0 // 0 for none  226 for LALT
+    12 emulate_textinput 0 
+    13 desktop_path 
+    14 sound_volume 256 // 0..256
+    15 music_volume 256 // 0..256
+    16 mix_buffer_size 1024 // usually 1024. Try 2048 if you get choppy sound
+    17 version 0.1.11d
+    18 root_path C:/Users/Tiago/AppData/Roaming/pico-8/carts/
+    19 cdata_path C:/Users/Tiago/AppData/Roaming/pico-8/cdata/
+    20 joystick_index 0
+    21 button_keys 0 0 0 0 0 0 0 0 0 0 0 0 0 
+    22 live_notes 0
+    23 cursor_snap 0
+    24 gif_len 8
+    25 gui_theme 0
+    26 screenshot_scale 3
+    27 gif_scale 2
+    28 shift_glyphs 1
+    29 show_backup_messages 1
+    30 host_framerate_control 1
+  
+  codo_system_init
+  Compiled against SDL version: 2.0.2
+  Linked against SDL version:   2.0.4
+  Built-in video drivers:   0 windows   1 dummy  
+  Current video driver: windows
+  Built-in render drivers:
+  Renderer direct3d:
+    Flags: 0x0000000E ( |  | )
+    Texture formats (1): ARGB8888
+  Renderer opengl:
+    Flags: 0x0000000E ( |  | )
+    Texture formats (1): ARGB8888
+  Renderer opengles2:
+    Flags: 0x0000000E ( |  | )
+    Texture formats (4): ARGB8888, ABGR8888, RGB888, BGR888
+  Renderer software:
+    Flags: 0x00000009 ( | )
+    Texture formats (8): ARGB8888, ABGR8888, RGBA8888, BGRA8888, RGB888, BGR888, RGB565, RGB555
+  codo_reset_timer
+  codo_gui_init
+  codo_keys_init
+  codo_text_init
+  codo_video_init
+  codo_mouse_init
+  codo_joystick_init
+  Reading controller mappings: C:/Users/Tiago/AppData/Roaming/pico-8/sdl_controllers.txt
+  searching for joysticks
+    found 0 joysticks
+  ok
+ok
+codo_load_pod: C:/Users/Tiago/Desktop/pico-8_win32/pico8.dat ok 
+codo_set_screen 128 128 8 100
+ set pixel_perfect 1
+ window size: 580 540
+Current renderer:
+  Renderer direct3d:
+    Flags: 0x0000000E ( |  | )
+    Texture formats (3): ARGB8888, YV12, IYUV
+    Max Texture Size: 8192x8192
+codo_sound_init mix_buffer_size: 1024
+codo_sound_init
+SDL_INIT_AUDIO ok
+SDL_OpenAudio ok
+Built-in audio drivers: 0 xaudio2 1 directsound 2 winmm 3 disk 4 dummy
+Current audio driver: xaudio2
+Current renderer:

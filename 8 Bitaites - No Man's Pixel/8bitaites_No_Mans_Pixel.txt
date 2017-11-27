@@ -1,0 +1,9 @@
+Descrição
+
+O nosso jogo consiste num astronauta biólogo explorando a galáxia à descoberta de vida extraterrestre, para a capturar de maneira a ser mostrada no Jardim Zoológico Intergalático. A vida extraterrestre é que pode não achar piada em ser capturada e poderá resistir de maneira bastante agressiva.
+
+Intruções:
+
+1-Conduzir a nave espacial a um planeta de maneira a começar a explorá-lo e a caçar vida selvagem.
+
+2- Nos planetas, devemos evitar os ataques dos animais ao mesmo tempo que tentamos capturá-los com o nosso Biocapturador 3000, que os miniaturiza e suga-os de seguida para a nossa mochila. À medida que os animais vão sendo sugados para a mochila, aparece a barra de resistência deles a diminuir. Quando ela chegar ao fim, o animal é capturado. Se formos atingido por algum animal, o astronauta morre.

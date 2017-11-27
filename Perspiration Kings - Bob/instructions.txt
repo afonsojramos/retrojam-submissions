@@ -1,0 +1,28 @@
+How to Play:
+
+To start the game you just have to press the 'Z' key.
+From there, if you just have to follow the clues the game will present you and use the same key to interact with objects
+After you find the 4 missing items, you will unlock an ending.
+
+Answers:
+Labels- I: interact, T:talk
+[I]Big wardrobe on your left
+[I]Teddy bear in the room in front of the starting point
+[I]Wardrobe in that same room
+[T]Wife in the starting bedroom
+[I]Toilet in the remaining room in the second floor
+[I]Fridge in the furthermost area in the first floor
+[T]Wife
+[I]Go down the stairs
+[I]Dinning table
+[T]Wife
+[I]Vase in the first room in the first floor
+[I]Main door
+
+Group-Perspiration Kings
+Elements-
+	Carlos Freitas
+	Diogo Dores
+	José Borges
+	Miguel Fernandes
+	Pedro Reis

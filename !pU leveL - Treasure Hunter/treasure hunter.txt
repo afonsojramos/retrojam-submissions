@@ -1,0 +1,4 @@
+Treasure Hunter
+
+
+O nosso jogo é um jogo 2D TopDown infinito caracterizado por duas fases distintas. Uma delas é a descoberta das ilhas através de um oceano gerado proceduralmente e a outra fase é a exploração da ilha, também gerada proceduralmente, recuperando os recursos gastos durante a viagem da primeira fase e simultaneamente fugindo aos projeteis de um mob a que denominamos de "indigena". O objetivo do jogo é obter o máximo de score possível. O score sobe a todos os momentos que o jogador se mantém vivo. Os controlos do jogo são muito simples, em ambas as fases usam-se apenas as setas de navegação, no menu inicial usa-se o "Z" para iniciar o jogo e no ecrã de gameover usa-se o "X" para reiniciar o mesmo.

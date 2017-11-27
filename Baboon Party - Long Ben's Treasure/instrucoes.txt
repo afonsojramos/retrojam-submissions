@@ -1,0 +1,19 @@
+O pirata Long Ben anda de ilha em ilha à descoberta do seu tesouro. A sua missão é proteger as ilhas dos piratas do Long Ben.
+
+
+ - 'X' no menu para iniciar o jogo
+ - Com o rato colocar marinheiros ou canhões em cima de uma ponte para defender contras os piratas
+ - Botão esquerdo do rato coloca um marinheiro
+ - Botão direito do rato coloca um canhão
+ - Só é permitido colocar 3 marinheiros e canhões por ponte (lado esquerdo da ponte)
+ - Os canhões fazem mais dano que os marinheiros mas são mais lentos e exigem um tempo de espera maior até poder colocar o próximo
+ - A dificuldade ajusta-se ao longo do tempo do jogo, podendo aparecer vários tipos de piratas com diferentes caraterísticas
+ - Se o tempo acabar e os piratas não passarem a ponte ganha
+ - Se os piratas passarem a ponte perde 
+
+
+Equipa Baboon Party
+
+- Ricardo Santos
+- Pedro Lopes
+- Tiago Mota

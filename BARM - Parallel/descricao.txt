@@ -1,0 +1,13 @@
+Equipa: BARM
+Titulo: Parallel
+Contexto Medieval: Os sacerdotes estranharam os ruidos da tombola da sua igreja e enviaram uma mensagem para orei a pedir, o guerreiro mais corajoso para ir a tombola 
+verificar os incidentes.
+O guerreiro, vai descobrir diversos personagens como o Pai Natal, Leprechaun e o Super Mario e os seus objectos, deverá espantá-los para os seus mundos paralelos antes que
+eles o assustem. Afinal ele é o mais corajoso.
+Jogo produzido para networking, 4 pessoas e com clip camera, em pico-8.
+
+Instruções:
+	- Os 4 jogadores devem selecionar a personagem, sendo que apenas 1 é o atacante e os outros sao os defesas.
+	- O atacante deve se mover( setas de direcao) e colecionar as peças no mapa com o seu super flash ( Z ) e camera reduzida.
+	- Os defesas devem ir atras do atacante ( setas de direcao ) podendo disparar ( X ) e assusta-lo.
+	

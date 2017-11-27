@@ -1,0 +1,7 @@
+Splorin Space
+
+Após uma completamente inevitável avaria, uma nave despenha-se num planeta remoto. Um explorador sobrevive à queda e defronta-se com o único ponto de interesse que os developers decidiram criar neste jogo que poderia bem ser sobre uma mega-épica exploração no espaço. Ao invés disto, colocam o sobrevivente da queda numa caverna habitada por alienígenas que curiosamente se parecem com um tubérculo - a batata.
+
+z - avançar texto
+x - ataque
+setas - mover e saltar e descer
